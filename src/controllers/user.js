@@ -95,7 +95,7 @@ const login = asyncHandler(async (req, res) => {
       "-password -refreshToken",
     );
 
-    return res
+    const response =  res
       .status(200)
       .cookie("AccessToken", AccessToken, options)
       .cookie("RefreshToken", RefreshToken, options)
@@ -110,6 +110,12 @@ const login = asyncHandler(async (req, res) => {
           "User log in successfull",
         ),
       );
+
+      if (!req.cookies?.AccessToken) {
+        throw new apiErrorResponse(500, "cookie not set");
+      }
+
+      return response;
   } catch (error) {
     throw new apiErrorResponse(500, error.message);
   }
@@ -145,7 +151,7 @@ const currentUser = asyncHandler(async (req, res) => {
 
 const changeProfile = asyncHandler(async (req, res) => {
   try {
-    const  image  = req.file.path;
+    const image = req.file.path;
     if (!image) {
       throw new apiErrorResponse(404, "profile pic required");
     }
@@ -163,8 +169,7 @@ const changeProfile = asyncHandler(async (req, res) => {
       { $set: { image: uploadProfile?.url } },
       { new: true },
     ).select("-password -refreshToken");
-    await updateProfile
-      .save({ validateBeforeSave: false })
+    await updateProfile.save({ validateBeforeSave: false });
     return res
       .status(200)
       .json(
@@ -178,4 +183,58 @@ const changeProfile = asyncHandler(async (req, res) => {
     throw new apiErrorResponse(401, error.message);
   }
 });
-export { registration, login, logout, currentUser, changeProfile };
+
+const chnagePassword = asyncHandler(async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    if (!(oldPassword || newPassword)) {
+      throw new apiErrorResponse(404, "all filed are reequired");
+    }
+    const user = await User.findById(req.user._id);
+    const checkPassword = await user.isPasswordCorrect(oldPassword);
+
+    if (!checkPassword) {
+      throw new apiErrorResponse(401, "password is incorrect!");
+    }
+
+    user.password = newPassword;
+    await user.save({
+      validateBeforeSave: false,
+    });
+
+    return res.json(
+      new apiSuccessResponse(200, user, "user password change successfully"),
+    );
+  } catch (error) {
+    throw new apiErrorResponse(401, error.message);
+  }
+});
+
+const getUserDetails = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      throw new apiErrorResponse(404, "user id not found");
+    }
+
+    const user = await User.findById(id)?.select("-password -refreshToken");
+
+    if (!user) {
+      throw new apiErrorResponse(404, "user not found with this id!");
+    }
+    return res.json(
+      new apiSuccessResponse(200, user, "User details fetched successfully"),
+    );
+  } catch (error) {
+    throw new apiErrorResponse(500, error.message);
+  }
+});
+export {
+  registration,
+  login,
+  logout,
+  currentUser,
+  changeProfile,
+  chnagePassword,
+  getUserDetails,
+};
