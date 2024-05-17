@@ -12,16 +12,15 @@ const options = {
 };
 
 const registration = asyncHandler(async (req, res) => {
-  try {
     console.log(req.body);
-    const { password, name, username, email } = req.body;
+    const { password, name, email } = req.body;
 
-    if (!(password || name || username || email)) {
+    if (!(password || name || email)) {
       throw new apiErrorResponse(500, "all fields are required!");
     }
 
     const existUser = await User.findOne({
-      $or: [{ username }, { email }],
+      $or: [{ email }],
     });
 
     if (existUser) {
@@ -41,10 +40,10 @@ const registration = asyncHandler(async (req, res) => {
     }
 
     const userCreating = await User.create({
-      username,
       email,
       password: hashedPassword,
       name,
+      username:'',
       image: profile?.url ? profile?.url : "",
     });
 
@@ -55,70 +54,69 @@ const registration = asyncHandler(async (req, res) => {
       .json(
         new apiSuccessResponse(200, createdUser, "User created successfully"),
       );
-  } catch (error) {
-    throw new apiErrorResponse(500, error.message);
-  }
+  
 });
+
+// login controller here --------------------------
 
 const login = asyncHandler(async (req, res) => {
   console.log(req.body.email);
-  try {
-    const { email, username, password } = req.body;
-    console.log(req.body);
-    if (!password) {
-      throw new apiErrorResponse(400, "password fields are required!");
-    }
-    if (!(username || email)) {
-      throw new apiErrorResponse(400, "username/email fields are required!");
-    }
-    const alreadyUser = await User.findOne({
-      $or: [{ username }, { email }],
-    });
 
-    if (!alreadyUser) {
-      throw new apiErrorResponse(
-        500,
-        "sorry! we cannot find user with this email",
-      );
-    }
-
-    const isPasswordOk = alreadyUser.isPasswordCorrect(password);
-    if (!isPasswordOk) {
-      throw new apiErrorResponse(500, "sorry! your password incorrect");
-    }
-
-    const { AccessToken, RefreshToken } = await generateAccessRefreshToken(
-      alreadyUser._id,
-    );
-
-    const loggedUser = await User.findById(alreadyUser._id).select(
-      "-password -refreshToken",
-    );
-
-    const response =  res
-      .status(200)
-      .cookie("AccessToken", AccessToken, options)
-      .cookie("RefreshToken", RefreshToken, options)
-      .json(
-        new apiSuccessResponse(
-          200,
-          {
-            user: loggedUser,
-            AccessToken,
-            RefreshToken,
-          },
-          "User log in successfull",
-        ),
-      );
-
-      if (!req.cookies?.AccessToken) {
-        throw new apiErrorResponse(500, "cookie not set");
-      }
-
-      return response;
-  } catch (error) {
-    throw new apiErrorResponse(500, error.message);
+  const { email, password } = req.body;
+  console.log(req.body);
+  if (!password) {
+    throw new apiErrorResponse(400, "password fields are required!");
   }
+  if (!email) {
+    throw new apiErrorResponse(400, "email fields are required!");
+  }
+  const alreadyUser = await User.findOne({
+    $or: [{ email }],
+  });
+
+  if (!alreadyUser) {
+    return res.status(401).json({email:"sorry! we cannot find user with this email"})
+    // throw new apiErrorResponse(
+    //   500,
+    //   "sorry! we cannot find user with this email",
+    // );
+  }
+
+  const isPasswordOk = await alreadyUser.isPasswordCorrect(password);
+
+  if (!isPasswordOk) {
+    // return res.json(new apiErrorResponse(401, "sorry! your password incorrect"))
+    return res.status(401).json({password:"Your password is incorrect!"})
+  }
+
+  const { AccessToken, RefreshToken } = await generateAccessRefreshToken(
+    alreadyUser._id,
+  );
+
+  const loggedUser = await User.findById(alreadyUser._id).select(
+    "-password -refreshToken",
+  );
+
+  const response = res
+    .status(200)
+    .cookie("AccessToken", AccessToken, options)
+    .cookie("RefreshToken", RefreshToken, options)
+    .json(
+      new apiSuccessResponse(
+        200,
+        {
+          user: loggedUser,
+          AccessToken,
+          RefreshToken,
+        },
+        "User log in successfull",
+      ),
+    );
+
+  if (!req.cookies?.AccessToken) {
+    throw new apiErrorResponse(500, "cookie not set");
+  }
+  return response;
 });
 
 const logout = asyncHandler(async (req, res) => {

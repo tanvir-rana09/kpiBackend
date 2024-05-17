@@ -13,7 +13,7 @@ import verifyUserWithJWT from "../middleware/verifyJWT.js";
 
 const router = Router();
 
-router.route("/register").post(upload.single("image"), registration);
+router.route("/signup").post(upload.single("image"), registration);
 router.route("/login").post(login);
 router.route("/logout").get(verifyUserWithJWT, logout);
 router.route("/current-user").get(verifyUserWithJWT, currentUser);
