@@ -1,17 +1,43 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import connectDB from "./db/dbConnect.js";
 import app from "./app.js";
 
-connectDB()
-  .then(() => {
-    console.log("Database Connect successfully");
-    app.listen(process.env.PORT || 3000, () => {
-      console.log("Server at running in port : ", process.env.PORT);
+dotenv.config();
+
+const startServer = async () => {
+  try {
+    await connectDB();
+    console.log("Database connected successfully");
+
+    const port = process.env.PORT || 3000;
+    const server = app.listen(port, () => {
+      console.log(`Server is running on port: ${port}`);
     });
-    app.on("error", () => {
-      console.log("Got some error while listing the URI");
+
+    server.on("error", (error) => {
+      console.error("Error occurred while starting the server:", error);
     });
-  })
-  .catch((error) => {
-    console.log("Database not connecting!");
-  });
+
+    // Graceful shutdown
+    process.on("SIGTERM", () => {
+      console.log("SIGTERM signal received: closing HTTP server");
+      server.close(() => {
+        console.log("HTTP server closed");
+        process.exit(0);
+      });
+    });
+
+    process.on("SIGINT", () => {
+      console.log("SIGINT signal received: closing HTTP server");
+      server.close(() => {
+        console.log("HTTP server closed");
+        process.exit(0);
+      });
+    });
+  } catch (error) {
+    console.error("Failed to connect to the database:", error);
+    process.exit(1);
+  }
+};
+
+startServer();

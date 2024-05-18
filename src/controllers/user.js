@@ -12,55 +12,45 @@ const options = {
 };
 
 const registration = asyncHandler(async (req, res) => {
-    console.log(req.body);
-    const { password, name, email } = req.body;
+  const { password, name, email } = req.body;
 
-    if (!(password || name || email)) {
-      throw new apiErrorResponse(500, "all fields are required!");
-    }
+  // Check if any required fields are missing
+  if (!password || !name || !email) {
+    throw new apiErrorResponse(400, "All fields are required!");
+  }
 
-    const existUser = await User.findOne({
-      $or: [{ email }],
-    });
+  // Check if user already exists
+  const existUser = await User.findOne({ email });
+  if (existUser) {
+    throw new apiErrorResponse(400, "User already exists", { existingUser: existUser });
+  }
 
-    if (existUser) {
-      throw new apiErrorResponse(500, "this user already exist");
-    }
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    let image;
+  // Hash the password
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    if (req.file?.path) {
-      image = req.file?.path;
-    }
+  let profileUrl = "";
+  if (req.file && req.file.path) {
+    // Upload profile image to cloudinary
+    const profile = await fileUploadonCloudinary(req.file.path);
+    profileUrl = profile.url || "";
+  }
 
-    let profile;
-    if (image) {
-      profile = await fileUploadonCloudinary(image);
-    }
+  // Create the user
+  const createdUser = await User.create({
+    email,
+    password: hashedPassword,
+    name,
+    username: "",
+    image: profileUrl,
+  });
 
-    const userCreating = await User.create({
-      email,
-      password: hashedPassword,
-      name,
-      username:'',
-      image: profile?.url ? profile?.url : "",
-    });
-
-    const createdUser = await User.findById(userCreating._id);
-
-    return res
-      .status(200)
-      .json(
-        new apiSuccessResponse(200, createdUser, "User created successfully"),
-      );
-  
+  // Return success response
+  res.status(200).json(new apiSuccessResponse(200, createdUser, "User created successfully"));
 });
 
 // login controller here --------------------------
 
 const login = asyncHandler(async (req, res) => {
-  console.log(req.body.email);
 
   const { email, password } = req.body;
   console.log(req.body);

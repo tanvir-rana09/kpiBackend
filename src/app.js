@@ -8,6 +8,17 @@ app.use(cors());
 app.use(cookieParser());
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true, limit: "20kb" }));
+app.use((err, req, res, next) => {
+	console.error(err.stack);
+	res.status(err.statusCode || 500).json({
+	  success: false,
+	  message: err.message || "Internal Server Error",
+	  errors: err.errors || [],
+	});
+  });
+  
+
+
 
 import studentRouter from "./routes/student.js";
 import teacherRouter from "./routes/teacher.js";
