@@ -9,6 +9,11 @@ app.use(cookieParser());
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true, limit: "20kb" }));
 app.use((err, req, res, next) => {
+	if (err instanceof ApiErrorResponse) {
+		return res.status(err.status).json({
+		  message: err.message,
+		});
+	  }
 	console.error(err.stack);
 	res.status(err.statusCode || 500).json({
 	  success: false,

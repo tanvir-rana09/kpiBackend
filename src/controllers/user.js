@@ -22,7 +22,7 @@ const registration = asyncHandler(async (req, res) => {
   // Check if user already exists
   const existUser = await User.findOne({ email });
   if (existUser) {
-    throw new apiErrorResponse(400, "User already exists", { existingUser: existUser });
+    throw new apiErrorResponse(400, "User already exists");
   }
 
   // Hash the password
@@ -45,13 +45,16 @@ const registration = asyncHandler(async (req, res) => {
   });
 
   // Return success response
-  res.status(200).json(new apiSuccessResponse(200, createdUser, "User created successfully"));
+  res
+    .status(200)
+    .json(
+      new apiSuccessResponse(200, createdUser, "User created successfully"),
+    );
 });
 
 // login controller here --------------------------
 
 const login = asyncHandler(async (req, res) => {
-
   const { email, password } = req.body;
   console.log(req.body);
   if (!password) {
@@ -65,7 +68,9 @@ const login = asyncHandler(async (req, res) => {
   });
 
   if (!alreadyUser) {
-    return res.status(401).json({email:"sorry! we cannot find user with this email"})
+    return res
+      .status(401)
+      .json({ email: "sorry! we cannot find user with this email" });
     // throw new apiErrorResponse(
     //   500,
     //   "sorry! we cannot find user with this email",
@@ -76,7 +81,7 @@ const login = asyncHandler(async (req, res) => {
 
   if (!isPasswordOk) {
     // return res.json(new apiErrorResponse(401, "sorry! your password incorrect"))
-    return res.status(401).json({password:"Your password is incorrect!"})
+    return res.status(401).json({ password: "Your password is incorrect!" });
   }
 
   const { AccessToken, RefreshToken } = await generateAccessRefreshToken(
@@ -137,9 +142,11 @@ const currentUser = asyncHandler(async (req, res) => {
     );
 });
 
-const changeProfile = asyncHandler(async (req, res) => {
-  try {
-    const image = req.file.path;
+onst changeProfile = asyncHandler(async (req, res) => {
+ c try {
+    const image = req.file?.path
+    console.log(req?.file);
+    console.log(image);
     if (!image) {
       throw new apiErrorResponse(404, "profile pic required");
     }
@@ -187,7 +194,7 @@ const chnagePassword = asyncHandler(async (req, res) => {
 
     user.password = newPassword;
     await user.save({
-      validateBeforeSave: false,
+      validateBeforeSave: false
     });
 
     return res.json(
