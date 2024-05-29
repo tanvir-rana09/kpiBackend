@@ -9,7 +9,7 @@ const connectDB = async () => {
     });
 
     mongoose.connection.on("error", (err) => {
-      console.log("MongoDB connection error:", err);
+      console.log("MongoDB connection error:", err);  
       process.exit(1); // Exit the process if there's a connection error 
     });
 
@@ -25,7 +25,7 @@ const connectDB = async () => {
       console.log("MongoDB connection closed");
     });
 
-    // For graceful shutdown
+    // For graceful shutdown 
     process.on("SIGINT", async () => {
       await mongoose.connection.close();
       console.log("MongoDB connection closed due to application termination");

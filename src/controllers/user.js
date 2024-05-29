@@ -9,6 +9,7 @@ import generateAccessRefreshToken from "../utils/generateAccessRefreshToken.js";
 const options = {
   httpOnly: true,
   secure: true,
+  sameSite: 'None'
 };
 
 const registration = asyncHandler(async (req, res) => {
@@ -29,6 +30,7 @@ const registration = asyncHandler(async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   let profileUrl = "";
+  console.log(req.file);
   if (req.file && req.file.path) {
     // Upload profile image to cloudinary
     const profile = await fileUploadonCloudinary(req.file.path);
@@ -107,7 +109,6 @@ const login = asyncHandler(async (req, res) => {
         "User log in successfull",
       ),
     );
-
   if (!req.cookies?.AccessToken) {
     throw new apiErrorResponse(500, "cookie not set");
   }
@@ -140,43 +141,33 @@ const currentUser = asyncHandler(async (req, res) => {
     .json(
       new apiSuccessResponse(200, req.user, "Current user get successfully"),
     );
-});
+}); 
 
-onst changeProfile = asyncHandler(async (req, res) => {
- c try {
-    const image = req.file?.path
-    console.log(req?.file);
-    console.log(image);
-    if (!image) {
-      throw new apiErrorResponse(404, "profile pic required");
-    }
-
-    const uploadProfile = await fileUploadonCloudinary(image);
-
-    if (!uploadProfile.url) {
-      throw new apiErrorResponse(
-        500,
-        "something went while upload file on cloudinary",
-      );
-    }
-    const updateProfile = await User.findByIdAndUpdate(
-      req.user?._id,
-      { $set: { image: uploadProfile?.url } },
-      { new: true },
-    ).select("-password -refreshToken");
-    await updateProfile.save({ validateBeforeSave: false });
-    return res
-      .status(200)
-      .json(
-        new apiSuccessResponse(
-          200,
-          updateProfile,
-          "change profile successfully",
-        ),
-      );
-  } catch (error) {
-    throw new apiErrorResponse(401, error.message);
+const changeProfile = asyncHandler(async (req, res) => {
+  const image = req.file?.path; 
+  console.log(image);
+  if (!image) {
+    throw new apiErrorResponse(404, "image not found");
   }
+  const uploadProfile =await fileUploadonCloudinary(image);
+
+  if (!uploadProfile?.url) {
+    throw new apiErrorResponse(
+      500,
+      "something went while upload file on cloudinary",
+    );
+  }
+  const updateProfile = await User.findByIdAndUpdate(
+    req.user?._id,
+    { $set: { image: uploadProfile?.url } },
+    { new: true },
+  ).select("-password -refreshToken");
+  await updateProfile.save({ validateBeforeSave: false });
+  return res
+    .status(200)
+    .json(
+      new apiSuccessResponse(200, updateProfile, "change profile successfully"),
+    );
 });
 
 const chnagePassword = asyncHandler(async (req, res) => {
@@ -194,7 +185,7 @@ const chnagePassword = asyncHandler(async (req, res) => {
 
     user.password = newPassword;
     await user.save({
-      validateBeforeSave: false
+      validateBeforeSave: false,
     });
 
     return res.json(
