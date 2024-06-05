@@ -9,7 +9,7 @@ import generateAccessRefreshToken from "../utils/generateAccessRefreshToken.js";
 const options = {
   httpOnly: true,
   secure: true,
-  sameSite: 'None'
+  sameSite: "None",
 };
 
 const registration = asyncHandler(async (req, res) => {
@@ -30,11 +30,13 @@ const registration = asyncHandler(async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   let profileUrl = "";
-  console.log(req.file);
+
   if (req.file && req.file.path) {
     // Upload profile image to cloudinary
     const profile = await fileUploadonCloudinary(req.file.path);
-    profileUrl = profile.url || "";
+    profileUrl =
+      profile.url ||
+      "https://res.cloudinary.com/tanvirrana/image/upload/v1716975541/ak4rodbdzqpd10scsqxn.jpg";
   }
 
   // Create the user
@@ -43,7 +45,8 @@ const registration = asyncHandler(async (req, res) => {
     password: hashedPassword,
     name,
     username: "",
-    image: profileUrl,
+    image:
+      "https://res.cloudinary.com/tanvirrana/image/upload/v1716975541/ak4rodbdzqpd10scsqxn.jpg",
   });
 
   // Return success response
@@ -127,7 +130,8 @@ const logout = asyncHandler(async (req, res) => {
       new: true,
     },
   );
-
+  res.clearCookie("RefreshToken", options);
+  res.clearCookie("AccessToken", options);
   return res
     .status(200)
     .json(new apiSuccessResponse(200, {}, "user logout successfully"))
@@ -141,15 +145,15 @@ const currentUser = asyncHandler(async (req, res) => {
     .json(
       new apiSuccessResponse(200, req.user, "Current user get successfully"),
     );
-}); 
+});
 
 const changeProfile = asyncHandler(async (req, res) => {
-  const image = req.file?.path; 
-  console.log(image);
+  const image = req.file?.path;
+  console.log(req.file);
   if (!image) {
     throw new apiErrorResponse(404, "image not found");
   }
-  const uploadProfile =await fileUploadonCloudinary(image);
+  const uploadProfile = await fileUploadonCloudinary(image);
 
   if (!uploadProfile?.url) {
     throw new apiErrorResponse(
