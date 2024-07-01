@@ -112,9 +112,6 @@ const login = asyncHandler(async (req, res) => {
         "User log in successfull",
       ),
     );
-  if (!req.cookies?.AccessToken) {
-    throw new apiErrorResponse(500, "cookie not set");
-  }
   return response;
 });
 
