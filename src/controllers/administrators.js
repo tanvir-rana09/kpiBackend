@@ -4,13 +4,13 @@ import apiSuccessResponse from "../utils/apiSuccessResponse.js";
 import asyncHandler from "../utils/asyncHanlder.js";
 import fileUploadonCloudinary from "../utils/cloudinary.js";
 
-const teacherDetailsPost = asyncHandler(async (req, res) => {
-  try {
+const administratorDetailsPost = asyncHandler(async (req, res) => {
+  // try {
     const {
       name,
       position,
       shift,
-      district,
+      address,
       department,
       education,
       joiningDate,
@@ -24,7 +24,7 @@ const teacherDetailsPost = asyncHandler(async (req, res) => {
         name,
         position,
         shift,
-        district,
+        address,
         department,
         education,
         joiningDate,
@@ -46,18 +46,18 @@ const teacherDetailsPost = asyncHandler(async (req, res) => {
       );
     }
     const fileLocalPath = req.file?.path;
-    console.log(req.file?.path);
+    let fileUpload;
+
     if (!fileLocalPath) {
-      throw new apiErrorResponse(404, "image not found");
+      fileUpload = await fileUploadonCloudinary(fileLocalPath);
     }
-    const fileUpload = await fileUploadonCloudinary(fileLocalPath);
 
     const createTeacher = await Teacher.create({
       name,
       position,
       shift,
-      district,
-      image: fileUpload.url,
+      address,
+      image: fileUpload?.url || '',
       department,
       education,
       joiningDate,
@@ -79,31 +79,35 @@ const teacherDetailsPost = asyncHandler(async (req, res) => {
     return res
       .status(200)
       .json(new apiSuccessResponse(200, newteacher, "Created successfully"));
-  } catch (error) {
-    throw new apiErrorResponse(401, error.message);
-  }
+  // } catch (error) {
+  //   throw new apiErrorResponse(401, error.message);
+  // }
 });
 
-const getTeachers = asyncHandler(async (req, res) => {
+const getAdministrators = asyncHandler(async (req, res) => {
   try {
-    const teachers = await Teacher.find();
-    if (!teachers) {
+    const administrators = await Teacher.find();
+    if (!administrators) {
       throw new apiErrorResponse(
         500,
-        "something went wrong while fetching all teachers details",
+        "something went wrong while fetching all administrators details",
       );
     }
     return res
       .status(200)
       .json(
-        new apiSuccessResponse(200, teachers, "Successfully got all teachers"),
+        new apiSuccessResponse(
+          200,
+          administrators,
+          "Successfully got all administrators",
+        ),
       );
   } catch (error) {
     throw new apiErrorResponse(500, error.message);
   }
 });
 
-const getTeacher = asyncHandler(async (req, res) => {
+const getAdministrator = asyncHandler(async (req, res) => {
   const { id } = req.params;
   if (!id) {
     throw new apiErrorResponse(500, "cannot find teacher id");
@@ -125,4 +129,4 @@ const getTeacher = asyncHandler(async (req, res) => {
     );
 });
 
-export { teacherDetailsPost, getTeachers,getTeacher };
+export { administratorDetailsPost, getAdministrators, getAdministrator };

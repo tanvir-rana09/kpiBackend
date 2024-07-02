@@ -26,13 +26,13 @@ app.use((err, req, res, next) => {
 
 
 import studentRouter from "./routes/student.js";
-import teacherRouter from "./routes/teacher.js";
+import administratorsRouter from "./routes/administrators.js";
 import photoRouter from "./routes/photos.js";
 import noticeRouter from "./routes/notice.js";
 import userRouter from "./routes/user.js";
 
 app.use("/api/v1/student", studentRouter);
-app.use("/api/v1/teachers", teacherRouter);
+app.use("/api/v1/administrators", administratorsRouter);
 app.use("/api/v1/photo", photoRouter);
 app.use("/api/v1/notice", noticeRouter);
 app.use("/api/v1/user", userRouter);

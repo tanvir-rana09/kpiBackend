@@ -52,7 +52,7 @@ const getImages = asyncHandler(async(req,res)=>{
 		return res
 		  .status(200)
 		  .json(
-			new apiSuccessResponse(200, image, "Successfully got all teachers"),
+			new apiSuccessResponse(200, image, "Successfully got all administrators"),
 		  );
 	  } catch (error) {
 		throw new apiErrorResponse(500, error.message);

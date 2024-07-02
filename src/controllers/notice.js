@@ -49,7 +49,7 @@ const getNotices = asyncHandler(async(req,res)=>{
 		return res
 		  .status(200)
 		  .json(
-			new apiSuccessResponse(200, notices, "Successfully got all teachers"),
+			new apiSuccessResponse(200, notices, "Successfully got all administrators"),
 		  );
 	  } catch (error) {
 		throw new apiErrorResponse(500, error.message);

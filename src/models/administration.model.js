@@ -15,7 +15,6 @@ const teacherSchema = Schema({
   },
   image: {
     type: String,
-    required:true
   },
   district: {
     type: String,
