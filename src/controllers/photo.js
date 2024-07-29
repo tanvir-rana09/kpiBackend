@@ -6,14 +6,14 @@ import fileUploadonCloudinary from "../utils/cloudinary.js";
 
 const photoDetails = asyncHandler(async (req, res) => {
   try {
-    const { title } = req.body;
+    const { title,description } = req.body;
 
     if (!title) {
       throw new apiErrorResponse(404, "title required");
     }
 
     const image = req.file?.path;
-    
+    console.log(image);
     if (!image) {
       throw new apiErrorResponse(404, "photo must required");
     }
@@ -22,6 +22,7 @@ const photoDetails = asyncHandler(async (req, res) => {
 
     const createPost = await Photo.create({
       title,
+      description,
       image: imageUpload.url,
     });
 
@@ -36,7 +37,7 @@ const photoDetails = asyncHandler(async (req, res) => {
         new apiSuccessResponse(200, newPost, "new post created successfully"),
       );
   } catch (error) {
-    throw new apiErrorResponse(500, "cannot post photo");
+    throw new apiErrorResponse(500, error);
   }
 });
 

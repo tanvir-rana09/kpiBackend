@@ -8,7 +8,7 @@ const administratorDetailsPost = asyncHandler(async (req, res) => {
   // try {
     const {
       name,
-      position,
+      position, 
       shift,
       address,
       department,
