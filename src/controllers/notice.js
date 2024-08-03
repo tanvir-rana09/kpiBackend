@@ -6,19 +6,20 @@ import fileUploadonCloudinary from "../utils/cloudinary.js";
 
 const noticeDetails = asyncHandler(async (req, res) => {
   try {
-    const { title, smallDesc } = req.body;
+    const { title, description } = req.body;
 
-    if (!(title && smallDesc)) {
+    if (!(title && description)) {
       throw new apiErrorResponse(404, "title and desc required");
     }
 
     const image = req.file?.path;
 
+
     const imageUpload = await fileUploadonCloudinary(image);
 
     const createNotice = await Notice.create({
       title,
-      smallDesc: smallDesc || "",
+      description: description || "",
       image: imageUpload.url,
     });
 
@@ -33,7 +34,7 @@ const noticeDetails = asyncHandler(async (req, res) => {
         new apiSuccessResponse(200, newNotice, "new post created successfully"),
       );
   } catch (error) {
-    throw new apiErrorResponse(500, "cannot create notice");
+    throw new apiErrorResponse(500, error);
   }
 });
 

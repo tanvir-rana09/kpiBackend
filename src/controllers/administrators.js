@@ -48,7 +48,7 @@ const administratorDetailsPost = asyncHandler(async (req, res) => {
     const fileLocalPath = req.file?.path;
     let fileUpload;
 
-    if (!fileLocalPath) {
+    if (fileLocalPath) {
       fileUpload = await fileUploadonCloudinary(fileLocalPath);
     }
 
