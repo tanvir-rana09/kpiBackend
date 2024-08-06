@@ -1,11 +1,17 @@
-import { studentDetailsPost, allStudents,getAstudent, semesterStudents } from "../controllers/student.js";
+import {
+  studentDetailsPost,
+  allStudents,
+  getAstudent,
+  semesterStudents,
+} from "../controllers/student.js";
 import { Router } from "express";
+import { upload } from "../middleware/multer.js";
 
-const router = Router()
+const router = Router();
 
-router.route("/add").post(studentDetailsPost)
-router.route("/allstudents").get(allStudents)
-router.route("/semester").get(semesterStudents)
-router.route("/:id").get(getAstudent)
+router.route("/").get(allStudents);
+router.route("/add").post(upload.single("image"), studentDetailsPost);
+router.route("/semester").get(semesterStudents);
+router.route("/:id").get(getAstudent);
 
 export default router;

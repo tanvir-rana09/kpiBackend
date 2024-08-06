@@ -2,9 +2,10 @@ import { Student } from "../models/student.model.js";
 import apiErrorResponse from "../utils/apiErrorResponse.js";
 import apiSuccessResponse from "../utils/apiSuccessResponse.js";
 import asyncHandler from "../utils/asyncHanlder.js";
+import fileUploadonCloudinary from "../utils/cloudinary.js";
 
 const studentDetailsPost = asyncHandler(async (req, res) => {
-  try {
+  // try {
     const {
       name,
       roll,
@@ -18,6 +19,7 @@ const studentDetailsPost = asyncHandler(async (req, res) => {
       gender,
       session,
     } = req.body;
+console.log(req.body);
 
     if (
       [name, roll, semester, shift, group, session, gender].some(
@@ -30,6 +32,13 @@ const studentDetailsPost = asyncHandler(async (req, res) => {
     const alreadyExistStudent = await Student.findOne({
       $or: [{ roll }, { registration }],
     });
+
+    const fileLocalPath = req.file?.path;
+    let fileUpload;
+
+    if (fileLocalPath) {
+      fileUpload = await fileUploadonCloudinary(fileLocalPath);
+    }
 
     if (alreadyExistStudent) {
       throw new apiErrorResponse(
@@ -50,6 +59,7 @@ const studentDetailsPost = asyncHandler(async (req, res) => {
       number: number || "",
       gender,
       session,
+      image: fileUpload?.url || '',
     });
 
     const newUser = await Student.findById(student._id);
@@ -63,16 +73,16 @@ const studentDetailsPost = asyncHandler(async (req, res) => {
       .json(
         new apiSuccessResponse(
           200,
-          { newUser },
+          newUser,
           "student details post successfully",
         ),
       );
-  } catch (error) {
-    throw new apiErrorResponse(
-      401,
-      error.message || "can not post student details",
-    );
-  }
+  // } catch (error) {
+  //   throw new apiErrorResponse(
+  //     401,
+  //     error.message || "can not post student details",
+  //   );
+  // }
 });
 
 const allStudents = asyncHandler(async (_, res) => {
@@ -88,7 +98,7 @@ const allStudents = asyncHandler(async (_, res) => {
       .json(
         new apiSuccessResponse(
           200,
-          { students },
+           students ,
           "successfully fetch all students details",
         ),
       );

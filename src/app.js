@@ -31,7 +31,7 @@ import photoRouter from "./routes/photos.js";
 import noticeRouter from "./routes/notice.js";
 import userRouter from "./routes/user.js";
 
-app.use("/api/v1/student", studentRouter);
+app.use("/api/v1/students", studentRouter);
 app.use("/api/v1/administrators", administratorsRouter);
 app.use("/api/v1/photo", photoRouter);
 app.use("/api/v1/notice", noticeRouter);

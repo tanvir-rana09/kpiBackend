@@ -7,11 +7,11 @@ const studentSchema = Schema({
     required: true,
   },
   roll: {
-    type: String,
+    type: Number,
     required: true,
   },
   registration: {
-    type: String,
+    type: Number,
   },
   semester: {
     type: String,
@@ -42,6 +42,9 @@ const studentSchema = Schema({
   session: {
     type: String,
     required: true,
+  },
+  image: {
+    type: String,
   },
 });
 

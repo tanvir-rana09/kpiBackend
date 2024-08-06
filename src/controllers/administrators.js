@@ -5,7 +5,7 @@ import asyncHandler from "../utils/asyncHanlder.js";
 import fileUploadonCloudinary from "../utils/cloudinary.js";
 
 const administratorDetailsPost = asyncHandler(async (req, res) => {
-  // try {
+  try {
     const {
       name,
       position, 
@@ -79,9 +79,9 @@ const administratorDetailsPost = asyncHandler(async (req, res) => {
     return res
       .status(200)
       .json(new apiSuccessResponse(200, newteacher, "Created successfully"));
-  // } catch (error) {
-  //   throw new apiErrorResponse(401, error.message);
-  // }
+  } catch (error) {
+    throw new apiErrorResponse(401, error.message);
+  }
 });
 
 const getAdministrators = asyncHandler(async (req, res) => {
